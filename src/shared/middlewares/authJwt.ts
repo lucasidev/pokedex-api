@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
-import { RoleModel } from '../../users/role.model.js';
 import { User } from '../../users/user.model.js';
 import { env } from '../config/env.js';
 import { Forbidden, Unauthorized } from '../utils/errors.js';
@@ -24,7 +23,7 @@ function extractToken(req: Request): string | null {
 export async function verifyToken(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const token = extractToken(req);
   if (!token) {
-    throw Forbidden('No token provided');
+    throw Unauthorized('No token provided');
   }
 
   let decoded: AuthTokenPayload;
@@ -34,13 +33,11 @@ export async function verifyToken(req: Request, _res: Response, next: NextFuncti
     throw Unauthorized('Invalid token');
   }
 
-  req.userId = decoded.id;
-
-  const user = await User.findById(req.userId).select('-password');
-  if (!user) {
-    throw Unauthorized('User not found');
+  if (typeof decoded.id !== 'string') {
+    throw Unauthorized('Invalid token');
   }
 
+  req.userId = decoded.id;
   next();
 }
 
@@ -54,8 +51,7 @@ export async function isAdmin(req: Request, _res: Response, next: NextFunction):
     throw Unauthorized('User not found');
   }
 
-  const roles = await RoleModel.find({ _id: { $in: user.roles } });
-  const isAdminRole = roles.some((r) => r.name === 'admin');
+  const isAdminRole = user.roles.some((r) => r.name === 'admin');
   if (!isAdminRole) {
     throw Forbidden('This operation requires admin role');
   }

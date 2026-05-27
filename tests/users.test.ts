@@ -67,9 +67,9 @@ describe('Users endpoints', () => {
       expect(res.status).toBe(200);
     });
 
-    it('returns 403 without a token', async () => {
+    it('returns 401 without a token', async () => {
       const res = await request(app).get('/api/users/using-token');
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(401);
     });
 
     it('returns 401 on a tampered token', async () => {
@@ -129,12 +129,12 @@ describe('Users endpoints', () => {
   });
 
   describe('GET /api/users (list)', () => {
-    it('rejects anonymous callers', async () => {
+    it('rejects anonymous callers with 401', async () => {
       const res = await request(app).get('/api/users');
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(401);
     });
 
-    it('rejects authenticated non-admin callers', async () => {
+    it('rejects authenticated non-admin callers with 403', async () => {
       const token = await registerAndGetToken('regular@example.com');
       const res = await request(app).get('/api/users').set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(403);
@@ -153,11 +153,11 @@ describe('Users endpoints', () => {
   });
 
   describe('GET /api/users/:id', () => {
-    it('rejects anonymous callers', async () => {
+    it('rejects anonymous callers with 401', async () => {
       await registerAndGetToken('target@example.com');
       const target = await User.findOne({ email: 'target@example.com' });
       const res = await request(app).get(`/api/users/${target?.id}`);
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(401);
     });
 
     it('returns the user to an authenticated caller', async () => {

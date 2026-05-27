@@ -103,14 +103,16 @@ describe('Auth endpoints', () => {
         .send({ email: 'mateo@example.com', password: 'wrong-pass' });
 
       expect(res.status).toBe(401);
+      expect(res.body.message).toBe('Invalid credentials');
     });
 
-    it('returns 404 when the user does not exist', async () => {
+    it('returns 401 with the same message when the email does not exist', async () => {
       const res = await request(app)
         .post('/api/auth/signin')
         .send({ email: 'nobody@example.com', password: 'something1' });
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe('Invalid credentials');
     });
   });
 });
