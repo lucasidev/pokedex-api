@@ -22,19 +22,15 @@ interface UserMethods {
   comparePassword(plain: string): Promise<boolean>;
 }
 
-interface UserStatics {
-  hashPassword(plain: string): Promise<string>;
-}
-
 export type UserDocument = HydratedDocument<UserAttributes, UserMethods>;
-export type UserModel = Model<UserAttributes, Record<string, never>, UserMethods> & UserStatics;
+export type UserModel = Model<UserAttributes, Record<string, never>, UserMethods>;
 
 const userSchema = new Schema<UserAttributes, UserModel, UserMethods>(
   {
     name: { type: String, required: true },
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, minlength: 8 },
     pokedex: { type: [String], default: [] },
     poketeam: {
       type: new Schema<PokeTeam>(
@@ -50,9 +46,6 @@ const userSchema = new Schema<UserAttributes, UserModel, UserMethods>(
   },
   { timestamps: true, versionKey: false },
 );
-
-userSchema.statics.hashPassword = async (plain: string): Promise<string> =>
-  bcrypt.hash(plain, BCRYPT_ROUNDS);
 
 userSchema.methods.comparePassword = async function (plain: string): Promise<boolean> {
   return bcrypt.compare(plain, this.password);
