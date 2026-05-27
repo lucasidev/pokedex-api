@@ -33,9 +33,9 @@ router.put(
   asyncHandler(removePokemonFromTeam),
 );
 
-router.get('/', asyncHandler(getUsers));
+router.get('/', asyncHandler(verifyToken), asyncHandler(isAdmin), asyncHandler(getUsers));
 router.get('/using-token', asyncHandler(verifyToken), asyncHandler(getUserByToken));
-router.get('/:id', asyncHandler(getUserById));
+router.get('/:id', asyncHandler(verifyToken), asyncHandler(getUserById));
 router.post(
   '/',
   asyncHandler(verifyToken),

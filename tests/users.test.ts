@@ -1,6 +1,9 @@
+import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import app from '../src/app.js';
+import { env } from '../src/shared/config/env.js';
 import { RoleModel } from '../src/users/role.model.js';
+import { User } from '../src/users/user.model.js';
 import { clearDatabase, startInMemoryMongo, stopInMemoryMongo } from './helpers/testDb.js';
 
 async function registerAndGetToken(email: string): Promise<string> {
@@ -13,6 +16,20 @@ async function registerAndGetToken(email: string): Promise<string> {
       password: 'tester12345',
     });
   return res.body.token as string;
+}
+
+async function createAdminAndGetToken(): Promise<string> {
+  const adminRole = await RoleModel.findOne({ name: 'admin' });
+  const admin = await User.create({
+    name: 'Admin',
+    username: 'admin',
+    email: 'admin@example.com',
+    password: 'admin12345',
+    roles: adminRole ? [adminRole._id] : [],
+    pokedex: [],
+    poketeam: null,
+  });
+  return jwt.sign({ id: admin.id }, env.JWT_SECRET, { expiresIn: '1h' });
 }
 
 describe('Users endpoints', () => {
@@ -108,6 +125,53 @@ describe('Users endpoints', () => {
         .get('/api/users/pokedex')
         .set('Authorization', `Bearer ${token}`);
       expect(listRes.body.result).not.toContain('bulbasaur');
+    });
+  });
+
+  describe('GET /api/users (list)', () => {
+    it('rejects anonymous callers', async () => {
+      const res = await request(app).get('/api/users');
+      expect(res.status).toBe(403);
+    });
+
+    it('rejects authenticated non-admin callers', async () => {
+      const token = await registerAndGetToken('regular@example.com');
+      const res = await request(app).get('/api/users').set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns the list to an admin', async () => {
+      await registerAndGetToken('member@example.com');
+      const adminToken = await createAdminAndGetToken();
+
+      const res = await request(app).get('/api/users').set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body.result)).toBe(true);
+      expect(res.body.result.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe('GET /api/users/:id', () => {
+    it('rejects anonymous callers', async () => {
+      await registerAndGetToken('target@example.com');
+      const target = await User.findOne({ email: 'target@example.com' });
+      const res = await request(app).get(`/api/users/${target?.id}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns the user to an authenticated caller', async () => {
+      const callerToken = await registerAndGetToken('caller@example.com');
+      await registerAndGetToken('target@example.com');
+      const target = await User.findOne({ email: 'target@example.com' });
+
+      const res = await request(app)
+        .get(`/api/users/${target?.id}`)
+        .set('Authorization', `Bearer ${callerToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.result.email).toBe('target@example.com');
+      expect(res.body.result.password).toBeUndefined();
     });
   });
 });
