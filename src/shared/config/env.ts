@@ -1,5 +1,12 @@
-import 'dotenv/config';
+import { config as loadDotenv } from 'dotenv';
 import { z } from 'zod';
+
+// Skip dotenv in tests: setup.ts owns the env exclusively, and loading
+// .env would silently inject things like REDIS_URL that tests don't
+// expect.
+if (process.env.NODE_ENV !== 'test') {
+  loadDotenv();
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
