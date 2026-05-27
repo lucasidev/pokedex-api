@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { isRedisEnabled, pingRedis } from './redis.js';
 
 export type CheckStatus = 'ok' | 'fail';
 
@@ -39,8 +40,16 @@ async function checkMongo(): Promise<DependencyCheck> {
   });
 }
 
+async function checkRedis(): Promise<DependencyCheck> {
+  return timed('redis', () => pingRedis());
+}
+
 export async function runHealthChecks(): Promise<HealthReport> {
-  const checks = await Promise.all([checkMongo()]);
+  const promises: Promise<DependencyCheck>[] = [checkMongo()];
+  if (isRedisEnabled()) {
+    promises.push(checkRedis());
+  }
+  const checks = await Promise.all(promises);
   const status: CheckStatus = checks.every((c) => c.status === 'ok') ? 'ok' : 'fail';
   return {
     status,

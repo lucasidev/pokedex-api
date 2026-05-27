@@ -2,10 +2,12 @@ import app from './app.js';
 import { env } from './config/env.js';
 import { connectDatabase, disconnectDatabase } from './lib/database.js';
 import { logger } from './lib/logger.js';
+import { connectRedis, disconnectRedis } from './lib/redis.js';
 import { runInitialSetup } from './utils/initialSetup.js';
 
 async function bootstrap(): Promise<void> {
   await connectDatabase();
+  await connectRedis();
   await runInitialSetup();
 
   const server = app.listen(env.PORT, () => {
@@ -15,6 +17,7 @@ async function bootstrap(): Promise<void> {
   const shutdown = async (signal: string): Promise<void> => {
     logger.info({ signal }, 'graceful shutdown started');
     server.close(async () => {
+      await disconnectRedis();
       await disconnectDatabase();
       logger.info('graceful shutdown complete');
       process.exit(0);

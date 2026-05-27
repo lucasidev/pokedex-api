@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.routes.js';
 import healthRoutes from './routes/health.routes.js';
 import indexRoutes from './routes/index.routes.js';
 import metricsRoutes from './routes/metrics.routes.js';
+import pokemonRoutes from './routes/pokemon.routes.js';
 import userRoutes from './routes/user.routes.js';
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api', apiLimiter);
 app.use('/api', indexRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/pokemon', pokemonRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
