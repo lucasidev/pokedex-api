@@ -1,6 +1,7 @@
 import request from 'supertest';
 import app from '../src/app.js';
 import { RoleModel } from '../src/users/role.model.js';
+import { User } from '../src/users/user.model.js';
 import { clearDatabase, startInMemoryMongo, stopInMemoryMongo } from './helpers/testDb.js';
 
 describe('Auth endpoints', () => {
@@ -19,17 +20,14 @@ describe('Auth endpoints', () => {
 
   describe('POST /api/auth/signup', () => {
     it('creates a new user and returns a JWT', async () => {
-      const res = await request(app)
-        .post('/api/auth/signup')
-        .send({
-          name: 'Lucia Mansilla',
-          username: 'lucia',
-          email: 'lucia@example.com',
-          password: 'lucia12345',
-          roles: ['user'],
-        });
+      const res = await request(app).post('/api/auth/signup').send({
+        name: 'Lucia Mansilla',
+        username: 'lucia',
+        email: 'lucia@example.com',
+        password: 'lucia12345',
+      });
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
       expect(res.body.token).toEqual(expect.any(String));
       expect(res.body.token.split('.')).toHaveLength(3);
     });
@@ -55,6 +53,28 @@ describe('Auth endpoints', () => {
         .send({ ...payload, email: 'other@example.com' });
 
       expect(res.status).toBe(409);
+    });
+
+    it('ignores roles in the body and always assigns the user role', async () => {
+      const res = await request(app)
+        .post('/api/auth/signup')
+        .send({
+          name: 'Sneaky',
+          username: 'sneaky',
+          email: 'sneaky@example.com',
+          password: 'sneaky12345',
+          roles: ['admin'],
+        });
+
+      expect(res.status).toBe(201);
+
+      const created = await User.findOne({ email: 'sneaky@example.com' }).populate<{
+        roles: { name: string }[];
+      }>('roles');
+      expect(created).not.toBeNull();
+      const roleNames = created?.roles.map((r) => r.name) ?? [];
+      expect(roleNames).toEqual(['user']);
+      expect(roleNames).not.toContain('admin');
     });
   });
 
