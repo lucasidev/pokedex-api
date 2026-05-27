@@ -12,10 +12,12 @@ export const metricsMiddleware: RequestHandler = (req, res, next) => {
 
   res.on('finish', () => {
     const durationSeconds = Number(process.hrtime.bigint() - startNs) / 1e9;
-    const route = req.route?.path ? `${req.baseUrl ?? ''}${req.route.path}` : req.path;
+    // Always emit route templates (e.g. /api/users/:id), never the raw path.
+    // Falling back to req.path lets ObjectIds explode Prometheus cardinality.
+    const routeTemplate = req.route?.path ? `${req.baseUrl ?? ''}${req.route.path}` : '<unmatched>';
     const labels = {
       method: req.method,
-      route,
+      route: routeTemplate,
       status_code: String(res.statusCode),
     };
     httpRequestsTotal.inc(labels);

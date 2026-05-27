@@ -17,12 +17,17 @@ function redactedRedisHost(url: string): string {
   }
 }
 
+const REDIS_CONNECT_TIMEOUT_MS = 5000;
+
 export async function connectRedis(): Promise<RedisClientType | null> {
   if (!env.REDIS_URL) {
     logger.warn('REDIS_URL not set, pokeapi proxy will bypass cache');
     return null;
   }
-  const c: RedisClientType = createClient({ url: env.REDIS_URL });
+  const c: RedisClientType = createClient({
+    url: env.REDIS_URL,
+    socket: { connectTimeout: REDIS_CONNECT_TIMEOUT_MS },
+  });
   c.on('error', (err) => {
     logger.error({ err }, 'redis error');
   });

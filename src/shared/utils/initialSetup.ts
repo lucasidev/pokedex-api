@@ -43,6 +43,10 @@ export async function runInitialSetup(): Promise<void> {
     await createAdmin();
     logger.info('initial setup complete');
   } catch (error) {
+    // Rethrow so bootstrap fails loud. A successful boot with missing
+    // roles or admin used to be silent and only surfaced when someone
+    // tried to log in.
     logger.error({ err: error }, 'initial setup failed');
+    throw error;
   }
 }

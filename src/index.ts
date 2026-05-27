@@ -14,7 +14,10 @@ async function bootstrap(): Promise<void> {
     logger.info({ port: env.PORT, env: env.NODE_ENV }, 'pokedex-api listening');
   });
 
+  let shuttingDown = false;
   const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     logger.info({ signal }, 'graceful shutdown started');
     server.close(async () => {
       await disconnectRedis();
