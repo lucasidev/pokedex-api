@@ -1,0 +1,45 @@
+name: PR title (Conventional Commits)
+
+# Cuando un PR se mergea con Squash, el título se vuelve el commit en main.
+# Lefthook valida los commits localmente; este workflow llena el gap del PR title.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    steps:
+      - uses: step-security/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            El subject del PR title debe empezar en minúscula.
+            Title actual: "{title}"
+            Ejemplo válido: "feat(auth): add forgot-password endpoint"

@@ -1,0 +1,67 @@
+name: Commits (Conventional Commits)
+
+# Valida que TODOS los commits del PR range cumplan Conventional Commits.
+# Cierra el gap "alguien usó --no-verify localmente + Rebase merge llega a main".
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: commits-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate every commit message
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commits
+        run: |
+          set -euo pipefail
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+
+          if ! git cat-file -e "$head" 2>/dev/null; then
+            echo "Head $head not accessible, skipping."
+            exit 0
+          fi
+          if ! git cat-file -e "$base" 2>/dev/null; then
+            echo "Base $base not accessible, skipping."
+            exit 0
+          fi
+
+          shas=$(git rev-list --reverse "$base..$head")
+          if [ -z "$shas" ]; then
+            echo "No commits to validate (PR base == head)."
+            exit 0
+          fi
+
+          fail=0
+          for sha in $shas; do
+            msg_file=$(mktemp)
+            git log -1 --format=%B "$sha" > "$msg_file"
+            if ! node scripts/hooks/commit-msg.mjs "$msg_file" 2>/dev/null; then
+              short=$(git rev-parse --short "$sha")
+              subject=$(git log -1 --format=%s "$sha")
+              echo "::error ::commit $short has an invalid Conventional Commit subject:"
+              echo "::error ::  \"$subject\""
+              fail=1
+            fi
+            rm -f "$msg_file"
+          done
+
+          if [ "$fail" -eq 1 ]; then
+            echo ""
+            echo "Conventional Commits format: <type>(<scope>): <description>"
+            echo "Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert."
+            exit 1
+          fi
