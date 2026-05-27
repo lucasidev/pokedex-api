@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { env } from '../shared/config/env.js';
 import { BadRequest, NotFound, Unauthorized } from '../shared/utils/errors.js';
-import { RoleModel, type RoleName } from '../users/role.model.js';
+import { RoleModel } from '../users/role.model.js';
 import { User } from '../users/user.model.js';
 
 interface SignUpBody {
@@ -10,7 +10,6 @@ interface SignUpBody {
   username?: string;
   email?: string;
   password?: string;
-  roles?: RoleName[];
 }
 
 interface SignInBody {
@@ -25,16 +24,17 @@ function signToken(userId: string): string {
 }
 
 export async function signUp(req: Request, res: Response): Promise<void> {
-  const { name, username, email, password, roles } = req.body as SignUpBody;
+  const { name, username, email, password } = req.body as SignUpBody;
 
   if (!name || !username || !email || !password) {
     throw BadRequest('name, username, email and password are required');
   }
 
-  const roleNames = roles && roles.length > 0 ? roles : ['user'];
-  const foundRoles = await RoleModel.find({ name: { $in: roleNames } });
-  if (foundRoles.length === 0) {
-    throw BadRequest('No valid roles provided');
+  // Public signup never grants admin: roles in the request body are ignored.
+  // Admin assignment lives in POST /api/users, which requires verifyToken + isAdmin.
+  const userRole = await RoleModel.findOne({ name: 'user' });
+  if (!userRole) {
+    throw BadRequest('Default user role is missing, contact an administrator');
   }
 
   const newUser = new User({
@@ -42,14 +42,14 @@ export async function signUp(req: Request, res: Response): Promise<void> {
     username,
     email,
     password,
-    roles: foundRoles.map((r) => r._id),
+    roles: [userRole._id],
     pokedex: [],
     poketeam: null,
   });
   const saved = await newUser.save();
 
   const token = signToken(saved.id);
-  res.status(200).json({ status: 'OK', code: 200, token });
+  res.status(201).json({ status: 'Created', code: 201, token });
 }
 
 export async function signIn(req: Request, res: Response): Promise<void> {
