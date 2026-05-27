@@ -1,0 +1,9 @@
+process.env.NODE_ENV = 'test';
+process.env.MONGODB_URI = 'mongodb://placeholder:27017/test';
+process.env.JWT_SECRET = 'test-jwt-secret-with-at-least-32-characters-for-zod';
+process.env.JWT_EXPIRES_IN = '1h';
+process.env.ADMIN_NAME = 'admin';
+process.env.ADMIN_EMAIL = 'admin@test.local';
+process.env.ADMIN_USERNAME = 'testadmin';
+process.env.ADMIN_PASSWORD = 'changeme123';
+process.env.LOG_LEVEL = 'fatal';
