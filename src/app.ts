@@ -6,8 +6,11 @@ import { pinoHttp } from 'pino-http';
 import { env } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.js';
+import { metricsMiddleware } from './middlewares/metrics.js';
 import authRoutes from './routes/auth.routes.js';
+import healthRoutes from './routes/health.routes.js';
 import indexRoutes from './routes/index.routes.js';
+import metricsRoutes from './routes/metrics.routes.js';
 import userRoutes from './routes/user.routes.js';
 
 const app = express();
@@ -23,6 +26,10 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(pinoHttp({ logger }));
+app.use(metricsMiddleware);
+
+app.use(healthRoutes);
+app.use(metricsRoutes);
 
 const apiLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS,
