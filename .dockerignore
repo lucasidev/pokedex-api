@@ -4,9 +4,12 @@ build
 coverage
 .git
 .gitignore
+.gitattributes
 .github
 .vscode
 .idea
+.claude
+CLAUDE.md
 .env
 .env.*
 !.env.example
@@ -16,6 +19,13 @@ Dockerfile
 .dockerignore
 .eslintcache
 .nyc_output
+.tool-versions
+lefthook.yml
+biome.json
+justfile
+
+# Tests are not shipped to the runtime image
+tests
 **/*.test.ts
 **/*.spec.ts
 __tests__
