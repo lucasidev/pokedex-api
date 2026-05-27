@@ -1,0 +1,28 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{ts,tsx,js,jsx,json,jsonc}"
+      run: npx biome check --write --no-errors-on-unmatched {staged_files} && git add {staged_files}
+
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: npx tsc --noEmit
+
+    no-secrets:
+      run: node scripts/hooks/no-secrets.mjs
+
+    no-emoji-comments:
+      run: node scripts/hooks/no-emoji-comments.mjs
+
+commit-msg:
+  commands:
+    conventional-commits:
+      run: node scripts/hooks/commit-msg.mjs {1}
+
+pre-push:
+  commands:
+    branch-naming:
+      run: node scripts/hooks/pre-push.mjs
+    typecheck:
+      run: npx tsc --noEmit
