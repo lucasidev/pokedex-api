@@ -22,7 +22,6 @@ import {
   pokemonNameBodySchema,
   userIdParamSchema,
 } from './users.schemas.js';
-import { checkExistingUser } from './verifySignUp.middleware.js';
 
 const router = Router();
 
@@ -74,7 +73,6 @@ router.post(
   asyncHandler(verifyToken),
   asyncHandler(isAdmin),
   validate({ body: createUserSchema }),
-  asyncHandler(checkExistingUser),
   asyncHandler(storeUser),
 );
 
