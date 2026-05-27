@@ -1,6 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
-import { BadRequest, Conflict } from '../shared/utils/errors.js';
-import { ROLES, type RoleName } from './role.model.js';
+import { Conflict } from '../shared/utils/errors.js';
 import { User } from './user.model.js';
 
 export async function checkExistingUser(
@@ -21,27 +20,6 @@ export async function checkExistingUser(
     const existing = await User.findOne({ email });
     if (existing) {
       throw Conflict('Email already exists');
-    }
-  }
-
-  next();
-}
-
-export function checkExistingRole(req: Request, _res: Response, next: NextFunction): void {
-  const { roles } = req.body as { roles?: unknown };
-
-  if (roles === undefined || roles === null) {
-    next();
-    return;
-  }
-
-  if (!Array.isArray(roles)) {
-    throw BadRequest('roles must be an array');
-  }
-
-  for (const role of roles) {
-    if (typeof role !== 'string' || !ROLES.includes(role as RoleName)) {
-      throw BadRequest(`Role ${String(role)} does not exist`);
     }
   }
 

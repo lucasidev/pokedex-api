@@ -1,26 +1,11 @@
 import type { Request, Response } from 'express';
 import { BadRequest, NotFound, Unauthorized } from '../shared/utils/errors.js';
-import { RoleModel, type RoleName } from './role.model.js';
+import { RoleModel } from './role.model.js';
 import { User } from './user.model.js';
+import type { CreatePoketeamInput, CreateUserInput, PokemonNameInput } from './users.schemas.js';
 
 const POKEDEX_MAX = 5;
 const POKETEAM_MAX = 3;
-
-interface CreateUserBody {
-  name?: string;
-  username?: string;
-  email?: string;
-  password?: string;
-  roles?: RoleName[];
-}
-
-interface PokemonNameBody {
-  pokemonName?: string;
-}
-
-interface CreatePoketeamBody {
-  teamName?: string;
-}
 
 function requireUserId(req: Request): string {
   if (!req.userId) {
@@ -53,13 +38,13 @@ export async function getUserByToken(req: Request, res: Response): Promise<void>
 }
 
 export async function storeUser(req: Request, res: Response): Promise<void> {
-  const { name, username, password, email, roles } = req.body as CreateUserBody;
-  if (!name || !username || !email || !password) {
-    throw BadRequest('name, username, email and password are required');
-  }
+  const { name, username, password, email, roles } = req.body as CreateUserInput;
 
   const roleNames = roles && roles.length > 0 ? roles : ['user'];
   const foundRoles = await RoleModel.find({ name: { $in: roleNames } });
+  if (foundRoles.length !== roleNames.length) {
+    throw BadRequest('One or more roles do not exist');
+  }
 
   const user = new User({
     name,
@@ -86,10 +71,7 @@ export async function getPokedex(req: Request, res: Response): Promise<void> {
 
 export async function catchPokemon(req: Request, res: Response): Promise<void> {
   const userId = requireUserId(req);
-  const { pokemonName } = req.body as PokemonNameBody;
-  if (!pokemonName) {
-    throw BadRequest('pokemonName is required');
-  }
+  const { pokemonName } = req.body as PokemonNameInput;
 
   const user = await User.findById(userId);
   if (!user) {
@@ -111,10 +93,7 @@ export async function catchPokemon(req: Request, res: Response): Promise<void> {
 
 export async function releasePokemon(req: Request, res: Response): Promise<void> {
   const userId = requireUserId(req);
-  const { pokemonName } = req.body as PokemonNameBody;
-  if (!pokemonName) {
-    throw BadRequest('pokemonName is required');
-  }
+  const { pokemonName } = req.body as PokemonNameInput;
 
   const user = await User.findById(userId);
   if (!user) {
@@ -138,10 +117,7 @@ export async function getPoketeam(req: Request, res: Response): Promise<void> {
 
 export async function createPoketeam(req: Request, res: Response): Promise<void> {
   const userId = requireUserId(req);
-  const { teamName } = req.body as CreatePoketeamBody;
-  if (!teamName) {
-    throw BadRequest('teamName is required');
-  }
+  const { teamName } = req.body as CreatePoketeamInput;
 
   const user = await User.findById(userId);
   if (!user) {
@@ -169,10 +145,7 @@ export async function deletePoketeam(req: Request, res: Response): Promise<void>
 
 export async function addPokemonToTeam(req: Request, res: Response): Promise<void> {
   const userId = requireUserId(req);
-  const { pokemonName } = req.body as PokemonNameBody;
-  if (!pokemonName) {
-    throw BadRequest('pokemonName is required');
-  }
+  const { pokemonName } = req.body as PokemonNameInput;
 
   const user = await User.findById(userId);
   if (!user) {
@@ -197,10 +170,7 @@ export async function addPokemonToTeam(req: Request, res: Response): Promise<voi
 
 export async function removePokemonFromTeam(req: Request, res: Response): Promise<void> {
   const userId = requireUserId(req);
-  const { pokemonName } = req.body as PokemonNameBody;
-  if (!pokemonName) {
-    throw BadRequest('pokemonName is required');
-  }
+  const { pokemonName } = req.body as PokemonNameInput;
 
   const user = await User.findById(userId);
   if (!user) {
