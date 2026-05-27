@@ -9,18 +9,17 @@
 //   refactor!: restructure auth module
 //   docs: update README
 
-import { readFileSync } from "node:fs";
+import { readFileSync } from 'node:fs';
 
 const msgFile = process.argv[2];
 if (!msgFile) {
-  console.error("Error: no se recibió el archivo de mensaje de commit.");
+  console.error('Error: no se recibió el archivo de mensaje de commit.');
   process.exit(1);
 }
 
-const msg = readFileSync(msgFile, "utf-8").trim();
+const msg = readFileSync(msgFile, 'utf-8').trim();
 
-const pattern =
-  /^(feat|fix|refactor|docs|chore|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
+const pattern = /^(feat|fix|refactor|docs|chore|test|style|perf|ci|build|revert)(\(.+\))?!?:\s.+/;
 
 if (!pattern.test(msg)) {
   console.error(`

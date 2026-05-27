@@ -8,14 +8,14 @@
 //   - Ramas permitidas: feature/*, fix/*, hotfix/*, release/*
 //   - No se permite push directo a main (solo merge)
 
-import { execSync } from "node:child_process";
+import { execSync } from 'node:child_process';
 
-const branch = execSync("git rev-parse --abbrev-ref HEAD", {
-  encoding: "utf-8",
+const branch = execSync('git rev-parse --abbrev-ref HEAD', {
+  encoding: 'utf-8',
 }).trim();
 
-const allowedPrefixes = ["feature/", "fix/", "hotfix/", "release/"];
-const protectedBranches = ["main", "master"];
+const allowedPrefixes = ['feature/', 'fix/', 'hotfix/', 'release/'];
+const protectedBranches = ['main', 'master'];
 
 if (protectedBranches.includes(branch)) {
   console.error(`
@@ -33,7 +33,7 @@ if (!allowedPrefixes.some((prefix) => branch.startsWith(prefix))) {
   console.error(`
 Push rechazado. La rama '${branch}' no sigue la convención de nombres.
 
-  Prefijos permitidos: ${allowedPrefixes.join(", ")}
+  Prefijos permitidos: ${allowedPrefixes.join(', ')}
   Ejemplo: feature/add-login, fix/null-pointer, hotfix/critical-crash
 `);
   process.exit(1);
