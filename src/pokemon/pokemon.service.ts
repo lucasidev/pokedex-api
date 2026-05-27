@@ -1,8 +1,8 @@
-import { env } from '../config/env.js';
-import { logger } from '../lib/logger.js';
-import { cacheHitsTotal, cacheMissesTotal } from '../lib/metrics.js';
-import { type PokemonSummary, fetchPokemonByName } from '../lib/pokeapi.js';
-import { getRedis } from '../lib/redis.js';
+import { env } from '../shared/config/env.js';
+import { logger } from '../shared/infra/logger.js';
+import { getRedis } from '../shared/infra/redis.js';
+import { cacheHitsTotal, cacheMissesTotal } from '../shared/metrics.js';
+import { type PokemonSummary, fetchPokemonByName } from './pokemon.pokeapi.js';
 
 const CACHE_NAMESPACE = 'pokemon';
 

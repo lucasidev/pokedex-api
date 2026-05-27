@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
 import jwt, { type SignOptions } from 'jsonwebtoken';
-import { env } from '../config/env.js';
-import { RoleModel, type RoleName } from '../models/Role.js';
-import { User } from '../models/User.js';
-import { BadRequest, NotFound, Unauthorized } from '../utils/errors.js';
+import { env } from '../shared/config/env.js';
+import { BadRequest, NotFound, Unauthorized } from '../shared/utils/errors.js';
+import { RoleModel, type RoleName } from '../users/role.model.js';
+import { User } from '../users/user.model.js';
 
 interface SignUpBody {
   name?: string;

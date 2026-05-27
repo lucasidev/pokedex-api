@@ -104,54 +104,65 @@ El JWT se envía en header `Authorization: Bearer <token>`. Por compatibilidad c
 
 ## Arquitectura
 
-**Patrón:** Layered Architecture (N-Tier) sobre Express monolítico. Cinco capas, de fuera hacia adentro: Routes (wiring HTTP), Controllers (request/response), Services (orquestación, solo donde aplica), Models (Mongoose), Lib (infra transversal: logger, metrics, db, redis, pokeapi).
+**Patrón:** Layered Architecture (N-Tier) sobre Express monolítico. Las capas (de fuera hacia adentro) son Routes (wiring HTTP), Controllers (request/response), Services (orquestación, solo donde aplica), Models (Mongoose) y módulos de infraestructura transversal (logger, metrics, db, redis).
 
-**Sistema de organización:** Package by Layer. Los archivos se agrupan por rol técnico (`controllers/`, `services/`, `models/`, `routes/`) y no por feature. Decisión consciente para el tamaño actual (~10 endpoints, 3 dominios). Si el proyecto crece a >20 features se evalúa migrar a Package by Feature / vertical slices.
+**Sistema de organización:** Package by Feature (vertical slices). Cada feature agrupa su controller, routes, models y service en su propio directorio. `shared/` concentra la infraestructura transversal (config, infra, middlewares, utils, metrics) y `system/` los endpoints del API mismo (health, metrics, welcome).
 
 ```
 src/
-├── config/env.ts              parsing de env vars con Zod, falla rápido al boot
-├── types/express.d.ts         augmentation de Request con userId
-├── lib/
-│   ├── logger.ts              Pino, pretty en dev, JSON en prod
-│   ├── database.ts            mongoose connect / disconnect con logs
-│   ├── redis.ts               Redis client opcional, isRedisEnabled()
-│   ├── pokeapi.ts             native fetch + métricas + PokeApiError
-│   ├── metrics.ts             prom-client Registry, counters e histograms
-│   └── health.ts              checks por dependencia con latencia
-├── models/
-│   ├── Role.ts                Role schema, ROLES literal type
-│   └── User.ts                User schema, bcrypt en pre-save, comparePassword
-├── middlewares/
-│   ├── authJwt.ts             verifyToken (Bearer + x-access-token), isAdmin
-│   ├── verifySignUp.ts        checkExistingUser, checkExistingRole
-│   ├── error.ts               notFoundHandler + errorHandler central
-│   └── metrics.ts             instrumenta HTTP requests con histograms
-├── controllers/
-│   ├── index.controller.ts    GET /api welcome
-│   ├── auth.controller.ts     signUp, signIn
-│   ├── users.controller.ts    CRUD usuarios + endpoints pokedex y poketeam
-│   └── pokemon.controller.ts  proxy GET /api/pokemon/:name
-├── services/
-│   └── pokemon.service.ts     cache-aside Redis + fetch a PokeAPI
-├── routes/                    routers Express con asyncHandler wrapper
-├── utils/
-│   ├── errors.ts              AppError + factories (BadRequest, NotFound, etc.)
-│   ├── asyncHandler.ts        wrapper que reenvía errores async a next()
-│   └── initialSetup.ts        crea roles default y admin al boot
-├── app.ts                     Express app sin listen (testable)
-└── index.ts                   bootstrap: connect Mongo + Redis + listen + graceful shutdown
+├── shared/
+│   ├── config/env.ts                       parsing de env vars con Zod, falla rápido al boot
+│   ├── types/express.d.ts                  augmentation de Request con userId
+│   ├── infra/
+│   │   ├── logger.ts                       Pino, pretty en dev, JSON en prod
+│   │   ├── database.ts                     mongoose connect / disconnect con logs
+│   │   └── redis.ts                        Redis client opcional, isRedisEnabled()
+│   ├── middlewares/
+│   │   ├── authJwt.ts                      verifyToken (Bearer + x-access-token), isAdmin
+│   │   ├── error.ts                        notFoundHandler + errorHandler central
+│   │   └── metrics.ts                      instrumenta HTTP requests con histograms
+│   ├── utils/
+│   │   ├── errors.ts                       AppError + factories (BadRequest, NotFound, etc.)
+│   │   ├── asyncHandler.ts                 wrapper que reenvía errores async a next()
+│   │   └── initialSetup.ts                 crea roles default y admin al boot
+│   └── metrics.ts                          prom-client Registry, counters e histograms
+│
+├── auth/                                   feature: signup + signin
+│   ├── auth.controller.ts
+│   └── auth.routes.ts
+│
+├── users/                                  feature: usuarios + pokedex + poketeam
+│   ├── user.model.ts                       schema Mongoose, bcrypt en pre-save
+│   ├── role.model.ts                       schema Mongoose, ROLES literal type
+│   ├── verifySignUp.middleware.ts          checkExistingUser, checkExistingRole
+│   ├── users.controller.ts                 CRUD usuarios + endpoints pokedex y poketeam
+│   └── users.routes.ts
+│
+├── pokemon/                                feature: proxy con cache
+│   ├── pokemon.pokeapi.ts                  native fetch a pokeapi.co + métricas + PokeApiError
+│   ├── pokemon.service.ts                  cache-aside Redis + fetch a PokeAPI
+│   ├── pokemon.controller.ts               GET /api/pokemon/:name
+│   └── pokemon.routes.ts
+│
+├── system/                                 endpoints del API mismo
+│   ├── health.service.ts                   checks por dependencia con latencia
+│   ├── health.routes.ts                    GET /health
+│   ├── metrics.routes.ts                   GET /metrics
+│   ├── welcome.controller.ts               GET /api welcome
+│   └── welcome.routes.ts
+│
+├── app.ts                                  Express app sin listen (testable)
+└── index.ts                                bootstrap: connect Mongo + Redis + listen + graceful shutdown
 ```
 
-### Decisión de layering
+### Decisión de layering interno por feature
 
-El patrón actual no es uniforme y es deliberado:
+El patrón service-controller-model no es uniforme dentro de cada feature, y es deliberado:
 
 - `pokemon` tiene service layer (`pokemon.service.ts`) porque orquesta dos sistemas externos (PokeAPI HTTP + Redis cache).
 - `auth` y `users` saltean services y llaman a Mongoose directo desde el controller. Son CRUD simple sin orquestación.
+- `pokemon` no tiene model porque no persistimos pokémons en Mongo. La data vive en PokeAPI y en Redis como cache; los nombres se guardan como strings dentro del `user.model`.
 - No hay repositories. Si surge la necesidad de swap del data store o de cachear queries de Mongo, ahí se extrae.
-
-Documentado más en detalle en `docs/architecture-audit.md`.
 
 ## Observabilidad
 

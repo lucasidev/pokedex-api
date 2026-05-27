@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
-import { ROLES, type RoleName } from '../models/Role.js';
-import { User } from '../models/User.js';
-import { BadRequest, Conflict } from '../utils/errors.js';
+import { BadRequest, Conflict } from '../shared/utils/errors.js';
+import { ROLES, type RoleName } from './role.model.js';
+import { User } from './user.model.js';
 
 export async function checkExistingUser(
   req: Request,

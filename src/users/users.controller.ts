@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import { RoleModel, type RoleName } from '../models/Role.js';
-import { User } from '../models/User.js';
-import { BadRequest, NotFound, Unauthorized } from '../utils/errors.js';
+import { BadRequest, NotFound, Unauthorized } from '../shared/utils/errors.js';
+import { RoleModel, type RoleName } from './role.model.js';
+import { User } from './user.model.js';
 
 const POKEDEX_MAX = 5;
 const POKETEAM_MAX = 3;

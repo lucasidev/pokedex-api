@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getPokemon } from '../controllers/pokemon.controller.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { asyncHandler } from '../shared/utils/asyncHandler.js';
+import { getPokemon } from './pokemon.controller.js';
 
 const router = Router();
 

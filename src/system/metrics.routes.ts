@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { metricsRegistry } from '../lib/metrics.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { metricsRegistry } from '../shared/metrics.js';
+import { asyncHandler } from '../shared/utils/asyncHandler.js';
 
 const router = Router();
 

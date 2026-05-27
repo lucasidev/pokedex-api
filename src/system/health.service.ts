@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { isRedisEnabled, pingRedis } from './redis.js';
+import { isRedisEnabled, pingRedis } from '../shared/infra/redis.js';
 
 export type CheckStatus = 'ok' | 'fail';
 

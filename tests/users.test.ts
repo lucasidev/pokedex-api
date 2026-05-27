@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../src/app.js';
-import { RoleModel } from '../src/models/Role.js';
+import { RoleModel } from '../src/users/role.model.js';
 import { clearDatabase, startInMemoryMongo, stopInMemoryMongo } from './helpers/testDb.js';
 
 async function registerAndGetToken(email: string): Promise<string> {

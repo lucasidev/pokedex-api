@@ -1,11 +1,11 @@
-import { env } from '../config/env.js';
-import { AppError } from '../utils/errors.js';
-import { logger } from './logger.js';
+import { env } from '../shared/config/env.js';
+import { logger } from '../shared/infra/logger.js';
 import {
   pokeapiErrorsTotal,
   pokeapiRequestDurationSeconds,
   pokeapiRequestsTotal,
-} from './metrics.js';
+} from '../shared/metrics.js';
+import { AppError } from '../shared/utils/errors.js';
 
 export interface PokemonSummary {
   id: number;
