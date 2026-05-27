@@ -16,7 +16,10 @@ const patterns = [
   },
   { name: 'Generic Secret', regex: /(?:secret|password|passwd|pwd)\s*[:=]\s*["'][^"']{8,}["']/i },
   { name: 'Private Key', regex: /-----BEGIN (?:RSA |EC |DSA )?PRIVATE KEY-----/ },
-  { name: 'Connection String', regex: /(?:mongodb|postgres|mysql|redis):\/\/[^\s"']+:[^\s"']+@/ },
+  // user/password segments cannot contain `$` or `{` without URL-encoding,
+  // so excluding them avoids matching template literals like
+  // `mongodb://${user}:${pwd}@host`.
+  { name: 'Connection String', regex: /(?:mongodb|postgres|mysql|redis):\/\/[^\s"'${}]+:[^\s"'${}]+@/ },
   { name: 'JWT', regex: /eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}/ },
   { name: 'GitHub Token', regex: /gh[ps]_[A-Za-z0-9_]{36,}/ },
 ];
