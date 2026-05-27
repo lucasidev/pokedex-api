@@ -4,18 +4,7 @@ import { env } from '../shared/config/env.js';
 import { BadRequest, Unauthorized } from '../shared/utils/errors.js';
 import { RoleModel } from '../users/role.model.js';
 import { User } from '../users/user.model.js';
-
-interface SignUpBody {
-  name?: string;
-  username?: string;
-  email?: string;
-  password?: string;
-}
-
-interface SignInBody {
-  email?: string;
-  password?: string;
-}
+import type { SignInInput, SignUpInput } from './auth.schemas.js';
 
 function signToken(userId: string): string {
   // expiresIn: jsonwebtoken expects a literal StringValue ('1h', '30m', etc.); env.JWT_EXPIRES_IN is a runtime string from env.
@@ -24,11 +13,7 @@ function signToken(userId: string): string {
 }
 
 export async function signUp(req: Request, res: Response): Promise<void> {
-  const { name, username, email, password } = req.body as SignUpBody;
-
-  if (!name || !username || !email || !password) {
-    throw BadRequest('name, username, email and password are required');
-  }
+  const { name, username, email, password } = req.body as SignUpInput;
 
   // Public signup never grants admin: roles in the request body are ignored.
   // Admin assignment lives in POST /api/users, which requires verifyToken + isAdmin.
@@ -53,11 +38,7 @@ export async function signUp(req: Request, res: Response): Promise<void> {
 }
 
 export async function signIn(req: Request, res: Response): Promise<void> {
-  const { email, password } = req.body as SignInBody;
-
-  if (!email || !password) {
-    throw BadRequest('email and password are required');
-  }
+  const { email, password } = req.body as SignInInput;
 
   const user = await User.findOne({ email });
   // Use the same response for "user does not exist" and "wrong password"

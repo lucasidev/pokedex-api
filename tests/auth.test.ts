@@ -39,6 +39,29 @@ describe('Auth endpoints', () => {
       expect(res.body.status).toBe('Bad Request');
     });
 
+    it('rejects short passwords with 400', async () => {
+      const res = await request(app).post('/api/auth/signup').send({
+        name: 'Short Pwd',
+        username: 'short',
+        email: 'short@example.com',
+        password: 'tiny',
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.details).toBeDefined();
+    });
+
+    it('rejects malformed emails with 400', async () => {
+      const res = await request(app).post('/api/auth/signup').send({
+        name: 'Bad Email',
+        username: 'bademail',
+        email: 'not-an-email',
+        password: 'goodpassword',
+      });
+
+      expect(res.status).toBe(400);
+    });
+
     it('rejects duplicate username with 409', async () => {
       const payload = {
         name: 'Lucia',
