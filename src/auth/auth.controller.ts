@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { env } from '../shared/config/env.js';
-import { BadRequest, NotFound, Unauthorized } from '../shared/utils/errors.js';
+import { BadRequest, Unauthorized } from '../shared/utils/errors.js';
 import { RoleModel } from '../users/role.model.js';
 import { User } from '../users/user.model.js';
 
@@ -60,13 +60,11 @@ export async function signIn(req: Request, res: Response): Promise<void> {
   }
 
   const user = await User.findOne({ email });
-  if (!user) {
-    throw NotFound('User not found');
-  }
-
-  const passwordMatch = await user.comparePassword(password);
-  if (!passwordMatch) {
-    throw Unauthorized('Invalid password');
+  // Use the same response for "user does not exist" and "wrong password"
+  // so the endpoint cannot be used to enumerate registered emails.
+  const passwordMatch = user ? await user.comparePassword(password) : false;
+  if (!user || !passwordMatch) {
+    throw Unauthorized('Invalid credentials');
   }
 
   const token = signToken(user.id);
