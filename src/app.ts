@@ -24,8 +24,7 @@ app.use(
     allowedHeaders: ['Authorization', 'Content-Type', 'Accept', 'x-access-token'],
   }),
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '20kb' }));
 app.use(pinoHttp({ logger }));
 app.use(metricsMiddleware);
 
@@ -40,8 +39,20 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
+// Tighter limiter for credentials endpoints: 10 requests per 5 minutes
+// per IP defeats casual brute force without inconveniencing real users.
+// Disabled in tests so the suite can register many users from 127.0.0.1.
+const authLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => env.NODE_ENV === 'test',
+  message: { status: 'Too Many Requests', code: 429, message: 'Too many auth attempts' },
+});
+
 app.use('/api', welcomeRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pokemon', pokemonRoutes);
 

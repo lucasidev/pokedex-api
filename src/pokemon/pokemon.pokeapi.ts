@@ -57,17 +57,23 @@ function normalize(raw: PokeApiRawPokemon): PokemonSummary {
   };
 }
 
+const POKEAPI_TIMEOUT_MS = 5000;
+
 export async function fetchPokemonByName(name: string): Promise<PokemonSummary> {
   const url = `${env.POKEAPI_BASE_URL}/pokemon/${encodeURIComponent(name.toLowerCase())}`;
   const startNs = process.hrtime.bigint();
 
   let response: Response;
   try {
-    response = await fetch(url, { headers: { Accept: 'application/json' } });
+    response = await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(POKEAPI_TIMEOUT_MS),
+    });
   } catch (err) {
-    pokeapiErrorsTotal.inc({ kind: 'network' });
-    logger.error({ err, url }, 'pokeapi network error');
-    throw new PokeApiError(502, 'pokeapi unreachable');
+    const kind = err instanceof Error && err.name === 'TimeoutError' ? 'timeout' : 'network';
+    pokeapiErrorsTotal.inc({ kind });
+    logger.error({ err, url, kind }, 'pokeapi request failed');
+    throw new PokeApiError(502, kind === 'timeout' ? 'pokeapi timeout' : 'pokeapi unreachable');
   }
 
   const durationSeconds = Number(process.hrtime.bigint() - startNs) / 1e9;
