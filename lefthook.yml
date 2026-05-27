@@ -7,7 +7,7 @@ pre-commit:
 
     typecheck:
       glob: "*.{ts,tsx}"
-      run: npx tsc --noEmit
+      run: npm run typecheck
 
     no-secrets:
       run: node scripts/hooks/no-secrets.mjs
@@ -25,4 +25,4 @@ pre-push:
     branch-naming:
       run: node scripts/hooks/pre-push.mjs
     typecheck:
-      run: npx tsc --noEmit
+      run: npm run typecheck

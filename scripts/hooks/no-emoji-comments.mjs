@@ -6,7 +6,7 @@
 // Los emojis en comentarios de código dificultan la búsqueda y grep.
 // UI strings y documentación están exentos.
 
-import { execSync } from "node:child_process";
+import { execSync } from 'node:child_process';
 
 const codeExtensions = /\.(ts|tsx|js|jsx|cs|rs|py|go|java|kt|swift)$/;
 
@@ -31,11 +31,11 @@ const commentPatterns = {
 
 let stagedFiles;
 try {
-  stagedFiles = execSync("git diff --cached --name-only --diff-filter=ACMR", {
-    encoding: "utf-8",
+  stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACMR', {
+    encoding: 'utf-8',
   })
     .trim()
-    .split("\n")
+    .split('\n')
     .filter((f) => codeExtensions.test(f));
 } catch {
   process.exit(0);
@@ -44,18 +44,18 @@ try {
 const violations = [];
 
 for (const file of stagedFiles) {
-  const ext = file.split(".").pop();
+  const ext = file.split('.').pop();
   const commentPattern = commentPatterns[ext];
   if (!commentPattern) continue;
 
   let content;
   try {
-    content = execSync(`git show :${file}`, { encoding: "utf-8" });
+    content = execSync(`git show :${file}`, { encoding: 'utf-8' });
   } catch {
     continue;
   }
 
-  const lines = content.split("\n");
+  const lines = content.split('\n');
   for (let i = 0; i < lines.length; i++) {
     if (commentPattern.test(lines[i]) && emojiRegex.test(lines[i])) {
       violations.push({ file, line: i + 1 });
@@ -64,10 +64,10 @@ for (const file of stagedFiles) {
 }
 
 if (violations.length > 0) {
-  console.error("\nCommit rechazado. Se encontraron emojis en comentarios de código:\n");
+  console.error('\nCommit rechazado. Se encontraron emojis en comentarios de código:\n');
   for (const v of violations) {
     console.error(`  ${v.file}:${v.line}`);
   }
-  console.error("\nLos emojis en comentarios dificultan la búsqueda. Removerlos.\n");
+  console.error('\nLos emojis en comentarios dificultan la búsqueda. Removerlos.\n');
   process.exit(1);
 }

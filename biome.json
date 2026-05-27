@@ -14,7 +14,8 @@
       "*.tsbuildinfo",
       "sbom.json",
       "package-lock.json",
-      "**/*.lock"
+      "**/*.lock",
+      "scripts/hooks/**"
     ]
   },
   "organizeImports": {
