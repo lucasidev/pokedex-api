@@ -6,9 +6,13 @@ default:
 setup:
     npm install
     npx lefthook install
+    just doctor
 
 teardown:
     npx rimraf node_modules dist coverage
+
+doctor:
+    npx tsx scripts/doctor.ts
 
 dev:
     npm run dev

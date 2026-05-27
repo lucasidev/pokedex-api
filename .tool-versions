@@ -1,0 +1,11 @@
+# Pin del toolchain del proyecto. Lo respetan asdf y mise — devs con esas
+# herramientas instalan automáticamente con `mise install` (o `asdf install`).
+#
+# Devs sin asdf/mise: archivo inerte. `just doctor` chequea drift vs lo
+# instalado y avisa si hay que actualizar.
+#
+# Política de bumps:
+#   - Tier 1 (node): patch OK, minor con review, major con planning.
+#   - Tier 2 (lefthook): patch + minor OK, major con review (rompen syntax).
+node 22.13.0
+lefthook 1.10.10
