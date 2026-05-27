@@ -3,16 +3,16 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
-import { env } from './config/env.js';
-import { logger } from './lib/logger.js';
-import { errorHandler, notFoundHandler } from './middlewares/error.js';
-import { metricsMiddleware } from './middlewares/metrics.js';
-import authRoutes from './routes/auth.routes.js';
-import healthRoutes from './routes/health.routes.js';
-import indexRoutes from './routes/index.routes.js';
-import metricsRoutes from './routes/metrics.routes.js';
-import pokemonRoutes from './routes/pokemon.routes.js';
-import userRoutes from './routes/user.routes.js';
+import authRoutes from './auth/auth.routes.js';
+import pokemonRoutes from './pokemon/pokemon.routes.js';
+import { env } from './shared/config/env.js';
+import { logger } from './shared/infra/logger.js';
+import { errorHandler, notFoundHandler } from './shared/middlewares/error.js';
+import { metricsMiddleware } from './shared/middlewares/metrics.js';
+import healthRoutes from './system/health.routes.js';
+import metricsRoutes from './system/metrics.routes.js';
+import welcomeRoutes from './system/welcome.routes.js';
+import userRoutes from './users/users.routes.js';
 
 const app = express();
 
@@ -40,7 +40,7 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
-app.use('/api', indexRoutes);
+app.use('/api', welcomeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pokemon', pokemonRoutes);

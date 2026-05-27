@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { getPokemonByName } from '../services/pokemon.service.js';
-import { BadRequest } from '../utils/errors.js';
+import { BadRequest } from '../shared/utils/errors.js';
+import { getPokemonByName } from './pokemon.service.js';
 
 export async function getPokemon(req: Request, res: Response): Promise<void> {
   const { name } = req.params;

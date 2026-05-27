@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { httpRequestDurationSeconds, httpRequestsTotal } from '../lib/metrics.js';
+import { httpRequestDurationSeconds, httpRequestsTotal } from '../metrics.js';
 
 const EXCLUDED_PATHS = new Set(['/metrics', '/health']);
 

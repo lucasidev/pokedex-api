@@ -1,7 +1,7 @@
+import { ROLES, RoleModel } from '../../users/role.model.js';
+import { User } from '../../users/user.model.js';
 import { env } from '../config/env.js';
-import { logger } from '../lib/logger.js';
-import { ROLES, RoleModel } from '../models/Role.js';
-import { User } from '../models/User.js';
+import { logger } from '../infra/logger.js';
 
 async function createRoles(): Promise<void> {
   const count = await RoleModel.estimatedDocumentCount();

@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
+import { RoleModel } from '../../users/role.model.js';
+import { User } from '../../users/user.model.js';
 import { env } from '../config/env.js';
-import { RoleModel } from '../models/Role.js';
-import { User } from '../models/User.js';
 import { Forbidden, Unauthorized } from '../utils/errors.js';
 
 interface AuthTokenPayload extends JwtPayload {

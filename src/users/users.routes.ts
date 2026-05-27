@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { isAdmin, verifyToken } from '../shared/middlewares/authJwt.js';
+import { asyncHandler } from '../shared/utils/asyncHandler.js';
 import {
   addPokemonToTeam,
   catchPokemon,
@@ -12,10 +14,8 @@ import {
   releasePokemon,
   removePokemonFromTeam,
   storeUser,
-} from '../controllers/users.controller.js';
-import { isAdmin, verifyToken } from '../middlewares/authJwt.js';
-import { checkExistingUser } from '../middlewares/verifySignUp.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+} from './users.controller.js';
+import { checkExistingUser } from './verifySignUp.middleware.js';
 
 const router = Router();
 

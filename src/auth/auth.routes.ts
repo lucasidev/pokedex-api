@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { signIn, signUp } from '../controllers/auth.controller.js';
-import { checkExistingRole, checkExistingUser } from '../middlewares/verifySignUp.js';
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { asyncHandler } from '../shared/utils/asyncHandler.js';
+import { checkExistingRole, checkExistingUser } from '../users/verifySignUp.middleware.js';
+import { signIn, signUp } from './auth.controller.js';
 
 const router = Router();
 
