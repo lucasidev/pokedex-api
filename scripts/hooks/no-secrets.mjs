@@ -31,6 +31,10 @@ const ignorePatterns = [
   /node_modules/,
   /\.example$/,
   /\.template$/,
+  // Tests usan fixtures con passwords/tokens estáticos que no son secrets reales.
+  /^tests\//,
+  /\.test\.(ts|js)$/,
+  /\.spec\.(ts|js)$/,
 ];
 
 let stagedFiles;
