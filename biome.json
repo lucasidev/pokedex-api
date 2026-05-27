@@ -6,7 +6,16 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignore": ["dist", "build", "coverage", "node_modules", "*.tsbuildinfo", "sbom.json"]
+    "ignore": [
+      "dist",
+      "build",
+      "coverage",
+      "node_modules",
+      "*.tsbuildinfo",
+      "sbom.json",
+      "package-lock.json",
+      "**/*.lock"
+    ]
   },
   "organizeImports": {
     "enabled": true
