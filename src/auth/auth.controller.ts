@@ -34,7 +34,7 @@ export async function signUp(req: Request, res: Response): Promise<void> {
   const saved = await newUser.save();
 
   const token = signToken(saved.id);
-  res.status(201).json({ status: 'Created', code: 201, token });
+  res.status(201).json({ status: 'Created', code: 201, data: { token } });
 }
 
 export async function signIn(req: Request, res: Response): Promise<void> {
@@ -49,5 +49,5 @@ export async function signIn(req: Request, res: Response): Promise<void> {
   }
 
   const token = signToken(user.id);
-  res.status(200).json({ status: 'OK', code: 200, token });
+  res.status(200).json({ status: 'OK', code: 200, data: { token } });
 }

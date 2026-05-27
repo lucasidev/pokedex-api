@@ -47,13 +47,13 @@ describe('GET /api/pokemon/:name (PokeAPI proxy)', () => {
     const res = await request(app).get('/api/pokemon/pikachu');
 
     expect(res.status).toBe(200);
-    expect(res.body.result).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: 25,
       name: 'pikachu',
       types: ['electric'],
       abilities: ['static'],
     });
-    expect(res.body.result.stats).toEqual([
+    expect(res.body.data.stats).toEqual([
       { name: 'hp', base: 35 },
       { name: 'attack', base: 55 },
     ]);
