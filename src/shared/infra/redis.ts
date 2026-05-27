@@ -8,6 +8,15 @@ export function isRedisEnabled(): boolean {
   return Boolean(env.REDIS_URL);
 }
 
+function redactedRedisHost(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.hostname}:${parsed.port || '6379'}`;
+  } catch {
+    return 'redis';
+  }
+}
+
 export async function connectRedis(): Promise<RedisClientType | null> {
   if (!env.REDIS_URL) {
     logger.warn('REDIS_URL not set, pokeapi proxy will bypass cache');
@@ -19,7 +28,7 @@ export async function connectRedis(): Promise<RedisClientType | null> {
   });
   await c.connect();
   client = c;
-  logger.info({ url: env.REDIS_URL }, 'redis connected');
+  logger.info({ host: redactedRedisHost(env.REDIS_URL) }, 'redis connected');
   return c;
 }
 
