@@ -126,6 +126,40 @@ describe('Users endpoints', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(listRes.body.data).not.toContain('bulbasaur');
     });
+
+    it('rejects catching a duplicate pokemon with 400', async () => {
+      const url = '/api/users/pokedex/catch-pokemon';
+      await request(app)
+        .put(url)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ pokemonName: 'eevee' });
+      const dup = await request(app)
+        .put(url)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ pokemonName: 'eevee' });
+
+      expect(dup.status).toBe(400);
+      expect(dup.body.message).toMatch(/already/i);
+    });
+
+    it('rejects catching beyond the pokedex limit with 400', async () => {
+      const url = '/api/users/pokedex/catch-pokemon';
+      const names = ['pikachu', 'charmander', 'squirtle', 'bulbasaur', 'eevee'];
+      for (const name of names) {
+        await request(app)
+          .put(url)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ pokemonName: name });
+      }
+
+      const overflow = await request(app)
+        .put(url)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ pokemonName: 'mewtwo' });
+
+      expect(overflow.status).toBe(400);
+      expect(overflow.body.message).toMatch(/full/i);
+    });
   });
 
   describe('GET /api/users (list)', () => {
