@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
+import { RoleModel } from '../../users/role.model.js';
 import { User } from '../../users/user.model.js';
 import { env } from '../config/env.js';
 import { Forbidden, Unauthorized } from '../utils/errors.js';
@@ -46,13 +47,14 @@ export async function isAdmin(req: Request, _res: Response, next: NextFunction):
     throw Unauthorized();
   }
 
-  const user = await User.findById(req.userId).populate<{ roles: { name: string }[] }>('roles');
-  if (!user) {
-    throw Unauthorized('User not found');
+  // Two cheap indexed reads instead of findById + populate + filter.
+  // Neither call instantiates a Mongoose document.
+  const adminRole = await RoleModel.findOne({ name: 'admin' }).select('_id').lean();
+  if (!adminRole) {
+    throw Unauthorized('Admin role missing from database');
   }
-
-  const isAdminRole = user.roles.some((r) => r.name === 'admin');
-  if (!isAdminRole) {
+  const isAdminUser = await User.exists({ _id: req.userId, roles: adminRole._id });
+  if (!isAdminUser) {
     throw Forbidden('This operation requires admin role');
   }
 
