@@ -16,7 +16,7 @@ function requireUserId(req: Request): string {
 
 export async function getUsers(_req: Request, res: Response): Promise<void> {
   const users = await User.find().select('-password -createdAt -updatedAt');
-  res.status(200).json({ status: 'OK', code: 200, data: users });
+  res.status(200).json(users);
 }
 
 export async function getUserById(req: Request, res: Response): Promise<void> {
@@ -25,7 +25,7 @@ export async function getUserById(req: Request, res: Response): Promise<void> {
   if (!user) {
     throw NotFound('User not found');
   }
-  res.status(200).json({ status: 'OK', code: 200, data: user });
+  res.status(200).json(user);
 }
 
 export async function getUserByToken(req: Request, res: Response): Promise<void> {
@@ -34,7 +34,7 @@ export async function getUserByToken(req: Request, res: Response): Promise<void>
   if (!user) {
     throw NotFound('User not found');
   }
-  res.status(200).json({ status: 'OK', code: 200, data: user });
+  res.status(200).json(user);
 }
 
 export async function storeUser(req: Request, res: Response): Promise<void> {
@@ -57,7 +57,8 @@ export async function storeUser(req: Request, res: Response): Promise<void> {
   });
   await user.save();
 
-  res.status(201).json({ status: 'Created', code: 201, message: 'User created successfully' });
+  const created = await User.findById(user._id).select('-password -createdAt -updatedAt');
+  res.status(201).json(created);
 }
 
 export async function getPokedex(req: Request, res: Response): Promise<void> {
@@ -66,7 +67,7 @@ export async function getPokedex(req: Request, res: Response): Promise<void> {
   if (!user) {
     throw NotFound('User not found');
   }
-  res.status(200).json({ status: 'OK', code: 200, data: user.pokedex });
+  res.status(200).json(user.pokedex);
 }
 
 export async function catchPokemon(req: Request, res: Response): Promise<void> {
@@ -94,7 +95,7 @@ export async function catchPokemon(req: Request, res: Response): Promise<void> {
     throw BadRequest('Could not catch pokemon');
   }
 
-  res.status(200).json({ status: 'OK', code: 200, message: 'Pokemon caught' });
+  res.status(204).end();
 }
 
 export async function releasePokemon(req: Request, res: Response): Promise<void> {
@@ -111,7 +112,7 @@ export async function releasePokemon(req: Request, res: Response): Promise<void>
     throw NotFound('User not found');
   }
 
-  res.status(200).json({ status: 'OK', code: 200, message: 'Pokemon released' });
+  res.status(204).end();
 }
 
 export async function getPoketeam(req: Request, res: Response): Promise<void> {
@@ -137,7 +138,7 @@ export async function createPoketeam(req: Request, res: Response): Promise<void>
     throw NotFound('User not found');
   }
 
-  res.status(201).json({ status: 'Created', code: 201, message: 'Team created' });
+  res.status(204).end();
 }
 
 export async function deletePoketeam(req: Request, res: Response): Promise<void> {
@@ -153,7 +154,7 @@ export async function deletePoketeam(req: Request, res: Response): Promise<void>
     throw NotFound('User not found');
   }
 
-  res.status(200).json({ status: 'OK', code: 200, message: 'Team deleted' });
+  res.status(204).end();
 }
 
 export async function addPokemonToTeam(req: Request, res: Response): Promise<void> {
@@ -182,7 +183,7 @@ export async function addPokemonToTeam(req: Request, res: Response): Promise<voi
     throw BadRequest('Could not add pokemon to team');
   }
 
-  res.status(200).json({ status: 'OK', code: 200, message: 'Pokemon added to team' });
+  res.status(204).end();
 }
 
 export async function removePokemonFromTeam(req: Request, res: Response): Promise<void> {
@@ -202,5 +203,5 @@ export async function removePokemonFromTeam(req: Request, res: Response): Promis
     throw BadRequest('Could not remove pokemon from team');
   }
 
-  res.status(200).json({ status: 'OK', code: 200, message: 'Pokemon removed from team' });
+  res.status(204).end();
 }
