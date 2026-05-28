@@ -121,7 +121,7 @@ export async function getPoketeam(req: Request, res: Response): Promise<void> {
   if (!user) {
     throw NotFound('User not found');
   }
-  res.status(200).json({ status: 'OK', code: 200, data: user.poketeam });
+  res.status(200).json(user.poketeam);
 }
 
 export async function createPoketeam(req: Request, res: Response): Promise<void> {
