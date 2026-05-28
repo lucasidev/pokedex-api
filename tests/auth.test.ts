@@ -28,8 +28,8 @@ describe('Auth endpoints', () => {
       });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.token).toEqual(expect.any(String));
-      expect(res.body.data.token.split('.')).toHaveLength(3);
+      expect(res.body.token).toEqual(expect.any(String));
+      expect(res.body.token.split('.')).toHaveLength(3);
     });
 
     it('rejects missing fields with 400', async () => {
@@ -117,7 +117,7 @@ describe('Auth endpoints', () => {
         .send({ email: 'mateo@example.com', password: 'mateo12345' });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.token).toEqual(expect.any(String));
+      expect(res.body.token).toEqual(expect.any(String));
     });
 
     it('returns 401 on wrong password', async () => {

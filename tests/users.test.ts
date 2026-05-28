@@ -15,7 +15,7 @@ async function registerAndGetToken(email: string): Promise<string> {
       email,
       password: 'tester12345',
     });
-  return res.body.data.token as string;
+  return res.body.token as string;
 }
 
 async function createAdminAndGetToken(): Promise<string> {
@@ -55,8 +55,8 @@ describe('Users endpoints', () => {
         .set('Authorization', `Bearer ${token}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.email).toBe('paula@example.com');
-      expect(res.body.data.password).toBeUndefined();
+      expect(res.body.email).toBe('paula@example.com');
+      expect(res.body.password).toBeUndefined();
     });
 
     it('accepts the legacy x-access-token header', async () => {
@@ -93,12 +93,12 @@ describe('Users endpoints', () => {
         .put('/api/users/pokedex/catch-pokemon')
         .set('Authorization', `Bearer ${token}`)
         .send({ pokemonName: 'pikachu' });
-      expect(catchRes.status).toBe(200);
+      expect(catchRes.status).toBe(204);
 
       const listRes = await request(app)
         .get('/api/users/pokedex')
         .set('Authorization', `Bearer ${token}`);
-      expect(listRes.body.data).toContain('pikachu');
+      expect(listRes.body).toContain('pikachu');
     });
 
     it('rejects catch when pokemonName is missing', async () => {
@@ -119,12 +119,12 @@ describe('Users endpoints', () => {
         .put('/api/users/pokedex/release-pokemon')
         .set('Authorization', `Bearer ${token}`)
         .send({ pokemonName: 'bulbasaur' });
-      expect(releaseRes.status).toBe(200);
+      expect(releaseRes.status).toBe(204);
 
       const listRes = await request(app)
         .get('/api/users/pokedex')
         .set('Authorization', `Bearer ${token}`);
-      expect(listRes.body.data).not.toContain('bulbasaur');
+      expect(listRes.body).not.toContain('bulbasaur');
     });
 
     it('rejects catching a duplicate pokemon with 400', async () => {
@@ -181,8 +181,8 @@ describe('Users endpoints', () => {
       const res = await request(app).get('/api/users').set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
-      expect(Array.isArray(res.body.data)).toBe(true);
-      expect(res.body.data.length).toBeGreaterThanOrEqual(2);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -204,8 +204,8 @@ describe('Users endpoints', () => {
         .set('Authorization', `Bearer ${callerToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.email).toBe('target@example.com');
-      expect(res.body.data.password).toBeUndefined();
+      expect(res.body.email).toBe('target@example.com');
+      expect(res.body.password).toBeUndefined();
     });
   });
 });
