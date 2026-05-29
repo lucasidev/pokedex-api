@@ -51,12 +51,13 @@ userSchema.methods.comparePassword = async function (plain: string): Promise<boo
   return bcrypt.compare(plain, this.password);
 };
 
-userSchema.pre('save', async function (next) {
+// Async pre hooks resolve via the returned promise in Mongoose, so there
+// is no next() to call. Mongoose 9 types the first arg as SaveOptions.
+userSchema.pre('save', async function () {
   if (!this.isModified('password')) {
-    return next();
+    return;
   }
   this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
-  next();
 });
 
 export const User = model<UserAttributes, UserModel>('User', userSchema);
