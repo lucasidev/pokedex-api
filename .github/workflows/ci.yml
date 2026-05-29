@@ -26,6 +26,11 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Catch a Windows-regenerated lockfile (npm/cli#4828) that dropped the
+      # linux platform binaries, before it fails the install or lint late.
+      - name: Verify lockfile platform binaries
+        run: node scripts/check-lockfile-platforms.mjs
+
       - name: Install dependencies
         run: npm install --no-audit --no-fund --ignore-scripts
 
