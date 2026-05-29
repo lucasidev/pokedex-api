@@ -37,13 +37,20 @@ jobs:
       - name: Rebuild native modules
         run: npm rebuild bcrypt
 
-      # Cache the mongod binary mongodb-memory-server downloads, so the test
-      # hooks do not race a cold download (which can blow past the timeout).
+      # Cache the mongod binary mongodb-memory-server downloads. Key includes
+      # the lockfile hash so a mongodb-memory-server bump (new mongod version)
+      # gets a fresh cache instead of restoring a stale binary.
       - name: Cache mongodb-memory-server binary
         uses: actions/cache@v5
         with:
           path: ~/.cache/mongodb-binaries
-          key: mongodb-binaries-${{ runner.os }}
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: mongodb-binaries-${{ runner.os }}-
+
+      # Download the mongod binary once, serially, before jest's parallel
+      # workers race on the download lock (UnableToUnlockLockfileError).
+      - name: Pre-download mongod binary
+        run: node scripts/predownload-mongo.mjs
 
       - name: Lint (Biome)
         run: npm run lint
