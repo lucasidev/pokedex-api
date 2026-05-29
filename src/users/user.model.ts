@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { type HydratedDocument, type Model, Schema, type Types, model } from 'mongoose';
+import { type HydratedDocument, type Model, model, Schema, type Types } from 'mongoose';
 
 const BCRYPT_ROUNDS = 12;
 

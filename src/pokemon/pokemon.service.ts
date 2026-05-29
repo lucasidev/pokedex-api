@@ -2,7 +2,7 @@ import { env } from '../shared/config/env.js';
 import { logger } from '../shared/infra/logger.js';
 import { getRedis } from '../shared/infra/redis.js';
 import { cacheHitsTotal, cacheMissesTotal } from '../shared/metrics.js';
-import { type PokemonSummary, fetchPokemonByName } from './pokemon.pokeapi.js';
+import { fetchPokemonByName, type PokemonSummary } from './pokemon.pokeapi.js';
 
 const CACHE_NAMESPACE = 'pokemon';
 

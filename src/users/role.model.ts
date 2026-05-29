@@ -1,4 +1,4 @@
-import { type InferSchemaType, Schema, model } from 'mongoose';
+import { type InferSchemaType, model, Schema } from 'mongoose';
 
 export const ROLES = ['user', 'admin'] as const;
 export type RoleName = (typeof ROLES)[number];
