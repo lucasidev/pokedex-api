@@ -32,6 +32,14 @@ jobs:
       - name: Rebuild native modules
         run: npm rebuild bcrypt
 
+      # Cache the mongod binary mongodb-memory-server downloads, so the test
+      # hooks do not race a cold download (which can blow past the timeout).
+      - name: Cache mongodb-memory-server binary
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}
+
       - name: Lint (Biome)
         run: npm run lint
 

@@ -12,6 +12,10 @@ export default {
   testMatch: ['**/__tests__/**/*.test.ts', '**/?(*.)+(spec|test).ts'],
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   setupFiles: ['<rootDir>/tests/setup.ts'],
+  // mongodb-memory-server downloads the mongod binary on a cold cache (CI),
+  // which can take longer than jest's default 5s and would time out the
+  // startInMemoryMongo hook. 30s gives the download room.
+  testTimeout: 30_000,
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
