@@ -178,16 +178,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v6
+      - name: Download coverage from the quality job
+        uses: actions/download-artifact@v7
         with:
-          node-version: 22
-          cache: npm
-
-      - run: npm install --no-audit --no-fund --ignore-scripts && npm rebuild bcrypt
-
-      - run: npm test -- --ci --coverage
-        env:
-          NODE_OPTIONS: --experimental-vm-modules
+          name: coverage
+          path: coverage
 
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v8
