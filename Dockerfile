@@ -48,7 +48,10 @@ USER app
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+# Standardized across the project: interval 10s, timeout 5s, 5 retries,
+# 15s grace. /health probes mongo + redis (readiness), so the orchestrator
+# only routes traffic once dependencies are reachable.
+HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=5 \
   CMD wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1
 
 CMD ["node", "dist/index.js"]
